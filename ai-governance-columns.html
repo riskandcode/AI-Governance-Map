@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Who Governs AI? — Risk & Code</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #fafaf7;
+  --ink: #1a1814;
+  --ink2: #3d3a34;
+  --muted: #8a8680;
+  --border: rgba(26,24,20,0.1);
+  --card-bg: #ffffff;
+
+  /* Layer colors — deep, saturated, distinct */
+  --c1: #1b4f8a; /* International — ink blue */
+  --c2: #1e6b3a; /* Regional — forest green */
+  --c3: #8a4a0a; /* National — burnt amber */
+  --c4: #6a2080; /* Civil society — deep violet */
+  --c5: #0f5c7a; /* Infrastructure — teal */
+  --c6: #1a6868; /* Organisation — dark cyan */
+  --c7: #8a2020; /* People — deep red */
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ── HEADER ── */
+#page-header {
+  padding: 32px 20px 0;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+#page-header .tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+#page-header h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(26px, 6vw, 36px);
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.15;
+  margin-bottom: 14px;
+}
+
+#page-header .intro {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink2);
+  margin-bottom: 10px;
+}
+
+#page-header .interconnect-note {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+  padding: 12px 16px;
+  border-left: 3px solid var(--border);
+  margin-bottom: 28px;
+  font-style: italic;
+}
+
+/* ── LEGEND ── */
+.legend {
+  max-width: 680px;
+  margin: 0 auto 28px;
+  padding: 0 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--ink2);
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── MAIN ── */
+#main {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 16px 60px;
+}
+
+/* ── LAYER SECTION ── */
+.layer-section {
+  margin-bottom: 12px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1.5px solid var(--border);
+}
+
+/* Layer header (accordion trigger) */
+.layer-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  background: var(--bg);
+  transition: background 0.15s ease;
+  position: relative;
+}
+
+.layer-header:active { background: rgba(26,24,20,0.03); }
+
+.layer-stripe {
+  width: 4px;
+  height: 36px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.layer-header-text { flex: 1; min-width: 0; }
+
+.layer-number {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.layer-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.layer-subtitle {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.layer-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.actor-count {
+  font-size: 10px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+}
+
+.chevron {
+  font-size: 14px;
+  color: var(--muted);
+  transition: transform 0.25s ease;
+  line-height: 1;
+}
+
+.layer-section.open .chevron {
+  transform: rotate(180deg);
+}
+
+/* Layer body */
+.layer-body {
+  display: none;
+  border-top: 1px solid var(--border);
+  background: var(--card-bg);
+}
+
+.layer-section.open .layer-body {
+  display: block;
+}
+
+/* Actor list */
+.actor-list {
+  padding: 8px 0;
+}
+
+.actor-item {
+  padding: 0;
+  border-bottom: 1px solid rgba(26,24,20,0.05);
+}
+.actor-item:last-child { border-bottom: none; }
+
+/* Actor header (clickable) */
+.actor-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 18px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.12s;
+}
+.actor-header:active { background: rgba(26,24,20,0.03); }
+
+.actor-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.actor-main { flex: 1; min-width: 0; }
+
+.actor-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.actor-short {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actor-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.power-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 8px;
+}
+
+.flag-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #c07010;
+}
+
+.actor-chevron {
+  font-size: 11px;
+  color: var(--muted);
+  transition: transform 0.2s;
+  margin-left: 4px;
+}
+
+.actor-item.open .actor-chevron {
+  transform: rotate(180deg);
+}
+
+/* Actor expanded panel */
+.actor-panel {
+  display: none;
+  padding: 0 18px 16px 36px;
+  border-top: 1px solid rgba(26,24,20,0.05);
+}
+
+.actor-item.open .actor-panel {
+  display: block;
+}
+
+.actor-panel-abbr {
+  font-size: 10px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  margin-bottom: 10px;
+  margin-top: 12px;
+}
+
+.actor-panel-what {
+  font-size: 13px;
+  line-height: 1.68;
+  color: var(--ink2);
+  margin-bottom: 14px;
+}
+
+.panel-meta-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(26,24,20,0.07);
+}
+
+.pmeta-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+
+.pmeta-val {
+  font-size: 12px;
+  color: var(--ink2);
+  line-height: 1.5;
+}
+
+.power-inline {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.power-note {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+  flex: 1;
+  min-width: 160px;
+}
+
+.flag-box {
+  margin-top: 10px;
+  padding: 9px 12px;
+  background: rgba(192,112,16,0.06);
+  border: 1px solid rgba(192,112,16,0.18);
+  border-radius: 7px;
+  font-size: 11px;
+  color: #7a4a08;
+  line-height: 1.5;
+}
+
+/* Power badge colors */
+.pb-high   { background: rgba(20,100,20,0.1);  color: #155a15; border: 1px solid rgba(20,100,20,0.18); }
+.pb-medium { background: rgba(140,90,0,0.1);   color: #7a5000; border: 1px solid rgba(140,90,0,0.18); }
+.pb-low    { background: rgba(100,100,100,0.08); color: #5a5a5a; border: 1px solid rgba(100,100,100,0.15); }
+.pb-stealth{ background: rgba(100,30,110,0.08); color: #5a1a6a; border: 1px solid rgba(100,30,110,0.15); }
+.pb-emerging{background: rgba(10,80,130,0.08); color: #0a4a7a; border: 1px solid rgba(10,80,130,0.15); }
+
+/* Footer */
+#page-footer {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 20px 40px;
+  text-align: center;
+}
+
+#page-footer p {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+#page-footer a {
+  color: var(--c1);
+  text-decoration: none;
+}
+
+/* Divider */
+.section-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+</style>
+</head>
+<body>
+
+<div id="page-header">
+  <div class="tag">Risk & Code — EU AI Act Series</div>
+  <h1>Who Actually Governs AI?</h1>
+  <p class="intro">AI governance is not one person, one law, or one institution. It is the sum of dozens of actors — each with different knowledge, different interests, and very different kinds of power.</p>
+  <p class="interconnect-note">Every actor on this map influences and is influenced by actors in other layers. The connections run in every direction simultaneously. No layer operates in isolation — which is precisely why AI governance is so difficult to get right.</p>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#1b4f8a"></div>International</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#1e6b3a"></div>Regional</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#8a4a0a"></div>National</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#6a2080"></div>Civil Society</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#0f5c7a"></div>Infrastructure</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#1a6868"></div>Organisation</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#8a2020"></div>People</div>
+  <div class="legend-item" style="gap:5px"><div style="width:6px;height:6px;border-radius:50%;background:#c07010;flex-shrink:0"></div><span style="font-size:11px;color:#7a4a08">Contested / still evolving</span></div>
+</div>
+
+<div id="main"></div>
+
+<div id="page-footer">
+  <p>Built for <strong>Risk & Code</strong> — going through the EU AI Act, article by article.<br>
+  This map is a living document. Last updated May 2026.</p>
+</div>
+
+<script>
+const LAYERS = [
+  {
+    id: 1,
+    color: '#1b4f8a',
+    title: 'International & Epistemic',
+    subtitle: 'Soft power, standards, and the vocabulary of governance',
+    desc: 'No single actor here can force anyone to do anything. But they define the terms of the debate, set the standards companies adopt before laws require them, and train the practitioners who run governance everywhere else.',
+  },
+  {
+    id: 2,
+    color: '#1e6b3a',
+    title: 'Regional & Supranational',
+    subtitle: 'Where the rulebooks are written',
+    desc: 'These bodies produce the binding rules that national authorities then enforce. The EU AI Act, the GDPR, and US federal frameworks all live at this level. Real power here is uneven — some have enforcement teeth, others only coordination authority.',
+  },
+  {
+    id: 3,
+    color: '#8a4a0a',
+    title: 'National',
+    subtitle: 'The enforcement layer — usually fragmented',
+    desc: 'Most AI governance enforcement happens here. But it is rarely one body — it is spread across data protection authorities, sector regulators, courts, competition authorities, and labour inspectorates, each operating under different mandates.',
+  },
+  {
+    id: 4,
+    color: '#6a2080',
+    title: 'Civil Society, Research & Adjacent',
+    subtitle: 'No formal authority — often decisive',
+    desc: 'This layer lacks enforcement power but drives agenda-setting, evidence-gathering, litigation, and public pressure. Whistleblowers, investigative journalists, and affected community organisations often trigger enforcement that regulators would never have initiated alone.',
+  },
+  {
+    id: 5,
+    color: '#0f5c7a',
+    title: 'Infrastructure & Investment',
+    subtitle: 'Govern through conditions of entry — rarely named in any law',
+    desc: 'Whoever controls the compute, the cloud, the chips, and the capital controls the conditions under which AI is built. These actors are often invisible in legal text but exercise more practical governance power than most regulators.',
+  },
+  {
+    id: 6,
+    color: '#1a6868',
+    title: 'Inside the Organisation',
+    subtitle: 'Governance happens in daily decisions, not just boardrooms',
+    desc: 'AI governance is not a compliance function — it lives in every product decision, every data pipeline, every vendor contract, and every deployment choice. Most of the people doing governance do not know they are doing it.',
+  },
+  {
+    id: 7,
+    color: '#8a2020',
+    title: 'Everyday People',
+    subtitle: 'Not passive users — active governance participants',
+    desc: 'Users, workers, patients, voters, and litigants are governance actors. Complaints trigger investigations. Court cases set precedent. Elections shape political will. Their lived experience is the evidence base for why AI governance matters at all.',
+  },
+];
+
+const NODES = [
+  // Layer 1
+  {id:'oecd',layer:1,name:'OECD',abbr:'Organisation for Economic Co-operation and Development',short:'First intergovernmental AI principles',what:'A club of 38 mostly wealthy countries that produces research and policy recommendations. Wrote the OECD AI Principles — the first intergovernmental standard on trustworthy AI, adopted in 2019. Many national AI laws reference these principles directly.',standing:'Soft-law standard-setter. No enforcement power.',power:'medium',powerNote:'High agenda-setting power. When the OECD defines a term, governments tend to adopt it.',answers:'Member states'},
+  {id:'iso',layer:1,name:'ISO/IEC',abbr:'International Organization for Standardization / International Electrotechnical Commission',short:'AI management system standard (ISO 42001)',what:'The bodies that write the technical standards the world runs on. ISO/IEC 42001 is their AI management system standard — a framework companies can get certified against. Quietly becoming a de facto requirement in B2B contracts and procurement.',standing:'Standard-setter. No direct legal enforcement power.',power:'high',powerNote:'ISO certification is becoming a market access requirement — more teeth than many laws.',answers:'National standards bodies and paying members'},
+  {id:'coe',layer:1,name:'Council of Europe',abbr:'CoE',short:'World\'s first binding international AI treaty',what:'Not the same as the EU. 46 member states including countries outside the EU. In 2024 it opened the Framework Convention on Artificial Intelligence — the world\'s first binding international treaty on AI and human rights.',standing:'Treaty-making body. Its AI Convention is legally binding for ratifying states.',power:'emerging',powerNote:'The convention is new and ratification is slow. Significance depends on how many states sign.',answers:'Member states',flag:'First binding international AI treaty. Still being ratified by relatively few countries.'},
+  {id:'g7',layer:1,name:'G7 Hiroshima AI Process',abbr:'G7 HAP',short:'Multilateral soft-law code of conduct for AI',what:'In 2023, the G7 launched this effort to develop shared principles for advanced AI. Produced an international code of conduct for AI developers. Not binding, but when seven major economies align on norms, companies pay attention.',standing:'Soft-law. No enforcement mechanism.',power:'medium',powerNote:'Sets the tone for responsible AI development across the world\'s major economies.',answers:'G7 governments'},
+  {id:'gpai',layer:1,name:'GPAI',abbr:'Global Partnership on Artificial Intelligence',short:'Multi-stakeholder AI research and policy body',what:'A multi-stakeholder initiative — governments, companies, researchers, civil society — launched in 2020 to guide responsible AI development. Unusual for including non-government voices. Produces research and policy recommendations.',standing:'Advisory body. No regulatory or enforcement power.',power:'low',powerNote:'Influence comes from convening credibility, not authority.',answers:'Member governments and the OECD'},
+  {id:'aisi',layer:1,name:'AI Safety Institutes',abbr:'AISI Network',short:'National institutes evaluating frontier AI safety',what:'A new and still-forming network of national institutes dedicated to evaluating the safety of advanced AI models. The UK launched the first in 2023, followed by the US, Japan, and others. They test frontier AI for dangerous capabilities and share findings internationally.',standing:'Emerging — formal status varies by country.',power:'emerging',powerNote:'Their evaluations are already influencing what developers test for and how regulators think about frontier AI risk.',answers:'Their respective national governments',flag:'Still expanding. New institutes are being announced and the coordination model is still being worked out.'},
+  {id:'iapp',layer:1,name:'IAPP',abbr:'International Association of Privacy Professionals',short:'World\'s largest AI governance professional community',what:'The world\'s largest community of data privacy and AI governance professionals. Offers certifications including the AIGP (AI Governance Professional). When IAPP defines what an AI governance professional should know, that definition shapes how the job is understood globally.',standing:'Professional body. No regulatory authority.',power:'stealth',powerNote:'Governs through the people who do governance. If you trained on IAPP materials, you apply their framework whether you know it or not.',answers:'Its membership — privacy and governance professionals worldwide'},
+  {id:'ieee',layer:1,name:'IEEE',abbr:'Institute of Electrical and Electronics Engineers',short:'Technical professional standards and ethics guidelines',what:'The world\'s largest technical professional organisation with nearly half a million members. Develops technical standards and ethics guidelines for engineers. Its Ethically Aligned Design work was an early serious attempt to translate AI ethics into engineering practice.',standing:'Standards body and professional association.',power:'medium',powerNote:'Shapes what engineers consider best practice. Standards feed into procurement requirements.',answers:'Its professional membership'},
+  {id:'acm',layer:1,name:'ACM',abbr:'Association for Computing Machinery',short:'Runs FAccT — flagship AI fairness research venue',what:'The major computer science professional society. Runs FAccT (Fairness, Accountability, and Transparency) — one of the most influential academic venues where AI bias and governance research gets published. Papers here regularly influence regulation and litigation.',standing:'Professional and academic society. No regulatory authority.',power:'medium',powerNote:'Shapes the research agenda. FAccT papers regularly reach regulators and courts.',answers:'Its academic and professional membership'},
+  {id:'unesco',layer:1,name:'UNESCO',abbr:'United Nations Educational, Scientific and Cultural Organization',short:'Broadest global consensus on AI ethics (193 states)',what:'The UN agency for education, science, and culture. In 2021, all 193 UNESCO member states adopted the Recommendation on the Ethics of AI — the broadest global consensus document on AI ethics. Not binding, but shapes international governance conversations.',standing:'Soft-law. The Recommendation is not legally binding.',power:'low',powerNote:'Broad legitimacy across the Global South, where other AI governance bodies have less reach.',answers:'UN member states'},
+  {id:'wef',layer:1,name:'WEF',abbr:'World Economic Forum',short:'Davos — elite agenda-setting, no formal authority',what:'The organisation behind the Davos annual meeting. Not a regulatory body, but influential on what the global elite thinks AI governance should look like. Produces frameworks that often become starting points for corporate AI policies.',standing:'Private forum. No regulatory authority.',power:'medium',powerNote:'Agenda-setting through access and convening. Shapes corporate discourse, which shapes practice.',answers:'Its members — large corporations and government leaders'},
+  {id:'itu',layer:1,name:'ITU',abbr:'International Telecommunication Union',short:'UN tech agency, active on AI in developing countries',what:'The UN agency for information and communication technologies. Increasingly active on AI governance, particularly in developing countries. Runs the AI for Good platform and is involved in international AI standards work.',standing:'UN specialised agency with some treaty-making functions.',power:'low',powerNote:'More influential in the Global South than in EU/US-dominated governance conversations.',answers:'UN member states'},
+
+  // Layer 2
+  {id:'euaio',layer:2,name:'EU AI Office',abbr:'European Union AI Office',short:'Enforces EU AI Act, especially on foundation models',what:'The body the European Commission created to oversee the EU AI Act — particularly the rules on general-purpose AI models (the powerful foundation models behind most AI products). Has the power to investigate, sanction, and issue guidance on how the AI Act applies.',standing:'EU regulatory body with formal enforcement powers.',power:'high',powerNote:'First point of contact for AI Act enforcement on major AI providers. Still building capacity.',answers:'The European Commission'},
+  {id:'euaib',layer:2,name:'EU AI Board',abbr:'European Union AI Board',short:'Coordinates national AI authorities across 27 member states',what:'A coordination body made up of representatives from each EU member state\'s national AI authority. Advises the Commission, facilitates consistent application of the AI Act across 27 countries, and helps develop guidelines. The meeting room where national and European AI regulators align.',standing:'Advisory and coordination body. No direct enforcement power.',power:'medium',powerNote:'Shapes how the AI Act is interpreted across 27 countries.',answers:'The European Commission and member states'},
+  {id:'edpb',layer:2,name:'EDPB',abbr:'European Data Protection Board',short:'Coordinates GDPR enforcement — covers most AI use',what:'Coordinates EU data protection authorities across all member states. Relevant because almost every AI system processes personal data — meaning the GDPR (General Data Protection Regulation) runs alongside the AI Act. Issues binding decisions on how data protection law applies to AI.',standing:'Has authority to issue binding decisions in cross-border cases.',power:'high',powerNote:'When AI and data protection overlap — which is most of the time — the EDPB matters as much as the AI Office.',answers:'EU member state data protection authorities collectively'},
+  {id:'enisa',layer:2,name:'ENISA',abbr:'European Union Agency for Cybersecurity',short:'EU cybersecurity agency, shapes AI security standards',what:'The EU\'s cybersecurity agency. Relevant because AI systems are also digital products with security requirements. Produces technical guidelines on how cybersecurity law intersects with AI system security.',standing:'EU agency with advisory and coordination functions.',power:'medium',powerNote:'Its security guidelines shape what a secure AI system means in practice.',answers:'EU member states and the European Commission'},
+  {id:'nist',layer:2,name:'NIST',abbr:'National Institute of Standards and Technology',short:'US agency behind the globally used AI Risk Management Framework',what:'A US government scientific agency that develops technical standards and frameworks. Its AI Risk Management Framework (AI RMF) is a globally influential reference for identifying, assessing, and managing AI risks — even without legal force. Companies use it before any regulator requires it.',standing:'US federal agency. No direct enforcement power.',power:'high',powerNote:'Globally influential through standards. The AI RMF is referenced in procurement and regulation across multiple jurisdictions.',answers:'US Department of Commerce'},
+  {id:'ftc',layer:2,name:'FTC',abbr:'Federal Trade Commission',short:'Most active US AI enforcer — under existing consumer law',what:'The main US consumer protection and competition regulator. No specific AI statute, but uses existing law against deceptive and unfair practices to take action on AI. Has investigated AI companies for false claims about capabilities and for discriminatory AI use.',standing:'US federal regulator with enforcement authority under existing law.',power:'high',powerNote:'The most active AI enforcer in the US right now — precisely because it does not need a new law to act.',answers:'US Congress and ultimately US citizens'},
+  {id:'ukico',layer:2,name:'UK ICO',abbr:'UK Information Commissioner\'s Office',short:'UK data protection regulator, active on automated decisions',what:'The UK\'s data protection regulator — equivalent to EU data protection authorities but covering the UK after Brexit. Active on AI governance through data protection law, particularly automated decision-making, profiling, and biometric data.',standing:'Statutory regulator with enforcement powers under UK data protection law.',power:'high',powerNote:'Already enforcing data protection law against AI use. Key player in the UK\'s sector-led AI governance model.',answers:'UK Parliament'},
+  {id:'drcf',layer:2,name:'UK DRCF',abbr:'Digital Regulation Cooperation Forum',short:'UK\'s cross-regulator AI coordination body',what:'A UK coordination body where the main digital regulators — ICO, Ofcom, FCA, CMA — work together on shared issues including AI. The UK has no single AI Act, so this represents its coordination mechanism for AI governance across sectors.',standing:'Voluntary coordination forum. No independent enforcement power.',power:'medium',powerNote:'Prevents conflicting regulatory guidance. Structurally important in a system without a single AI law.',answers:'Its member regulators, which answer to Parliament'},
+  {id:'imda',layer:2,name:'IMDA',abbr:'Infocomm Media Development Authority (Singapore)',short:'Singapore\'s model-framework approach to AI governance',what:'Singapore\'s digital regulator and main institutional node for AI governance. Produced the Model AI Governance Framework — one of the earliest detailed national frameworks. Singapore uses a voluntary-framework-and-testbed approach rather than binding legislation.',standing:'Statutory authority with regulatory powers in the digital sector.',power:'medium',powerNote:'Influential regionally as a prominent example of voluntary-framework-first AI governance.',answers:'Singapore government'},
+
+  // Layer 3
+  {id:'dpa',layer:3,name:'Data Protection Authorities',abbr:'DPAs — national level',short:'First movers on AI enforcement via GDPR',what:'National regulators enforcing data protection law — in EU countries, the GDPR. Because AI systems almost always process personal data, DPAs are often the first regulators to investigate AI-related complaints. The Irish DPA has jurisdiction over many US tech companies headquartered in Ireland.',standing:'Statutory regulators with significant enforcement powers including fines.',power:'high',powerNote:'Already active. The GDPR has been enforced against AI use for years. DPAs do not need an AI Act to act.',answers:'National governments and, in cross-border cases, the EDPB'},
+  {id:'sectorreg',layer:3,name:'Sector Regulators',abbr:'Health, finance, transport, labour, education…',short:'Apply existing sector law to AI — often fastest enforcers',what:'Regulators for specific industries. When AI is used in their sector, these bodies are often the primary enforcers. A medical AI system is regulated by the health authority. An AI used in lending is regulated by the financial regulator. They apply existing law to AI — often faster than dedicated AI legislation.',standing:'Statutory regulators with sector-specific enforcement powers.',power:'high',powerNote:'Do not underestimate these. They can act on AI harms right now, under laws in force for decades.',answers:'National governments and parliaments'},
+  {id:'compauth',layer:3,name:'Competition Authorities',abbr:'EU DG Competition, US FTC/DOJ, national equivalents',short:'Investigating AI market concentration and monopoly risk',what:'Regulators preventing monopolies and protecting market competition. Increasingly active on AI — investigating whether concentration of compute, data, and foundation model access creates unfair market power. One of the few actors with tools to address structural AI power concentration.',standing:'Statutory regulators with significant enforcement powers including fines and structural remedies.',power:'high',powerNote:'One of the few actors with legal tools to address the concentration of power in AI infrastructure.',answers:'National governments'},
+  {id:'courts',layer:3,name:'Courts & Judiciary',abbr:'',short:'Setting AI precedent — often faster than legislators',what:'Where AI governance disputes ultimately land. Courts interpret whether existing law applies to AI harms, whether liability is clear, and whether rights have been violated. In 2024–2026, courts have been active on AI copyright, liability, discrimination, and automated decision-making — often faster than legislators.',standing:'Formal authority to resolve disputes, set precedent, and review government action.',power:'high',powerNote:'Court decisions create precedent that shapes what every other actor has to do.',answers:'The law and, in democratic systems, the public'},
+  {id:'laborauth',layer:3,name:'Labour Authorities',abbr:'',short:'Workplace AI surveillance and algorithmic management',what:'Regulators responsible for employment law, workplace safety, and workers\' rights. AI used in hiring, performance monitoring, task allocation, and workplace surveillance falls within their jurisdiction — often under existing law, even where no AI-specific rule exists.',standing:'Statutory regulators with enforcement powers over employment conditions.',power:'medium',powerNote:'Increasingly active as algorithmic management becomes widespread.',answers:'National governments'},
+  {id:'consprotect',layer:3,name:'Consumer Protection Bodies',abbr:'',short:'First point of contact for everyday AI harms',what:'Regulators and ombudspersons protecting consumers from unfair or harmful practices. AI used in pricing, personalisation, recommender systems, and customer interaction falls within their scope. Often the first point of contact for individual complaints about AI-related harm.',standing:'Statutory bodies with enforcement or advisory powers depending on the country.',power:'medium',powerNote:'Important first-resort complaints mechanism for everyday AI harms.',answers:'National governments'},
+  {id:'naiao',layer:3,name:'National AI Offices',abbr:'e.g. Hungary\'s AI Market Surveillance Authority (Act LXXV of 2025)',short:'New dedicated AI enforcement bodies — still finding footing',what:'Dedicated national bodies set up to coordinate AI policy and, in some countries, enforce AI-specific rules. Hungary\'s AI Market Surveillance Authority (created by Act LXXV of 2025) is one example. Many are still hiring and working out their relationship to existing regulators.',standing:'Varies by country — some have formal enforcement powers, others are advisory.',power:'emerging',powerNote:'Formal authority is on paper. Real capacity to enforce is still being built.',answers:'National governments',flag:'Most national AI offices are newly established and still finding their footing. Watch how enforcement develops in 2026–2027.'},
+  {id:'legislature',layer:3,name:'National Parliaments',abbr:'',short:'Source of legal authority — and democratic accountability',what:'National parliaments that pass the laws everyone else enforces. In EU member states, they implement EU directives, create domestic AI enforcement structures, and can add national rules where the AI Act allows. They also hold governments and regulators accountable through scrutiny and budget control.',standing:'Democratic law-making authority.',power:'high',powerNote:'The source of legal authority everything else depends on.',answers:'Voters'},
+
+  // Layer 4
+  {id:'academics',layer:4,name:'Academics & Researchers',abbr:'',short:'Frame the agenda — define what counts as an AI harm',what:'University researchers and independent scientists studying AI systems, their impacts, and governance options. Academic work on bias, safety, and transparency often reaches regulators and courts before the public. Conferences like FAccT, NeurIPS, and ICML set the research agenda.',standing:'No formal regulatory authority.',power:'medium',powerNote:'Frame what problems are worth solving and what solutions look credible. Regulators rely on academic evidence to justify rules.',answers:'Their institutions, funders, and the scientific community'},
+  {id:'journalists',layer:4,name:'Investigative Journalists',abbr:'',short:'Often the reason enforcement happens at all',what:'Reporters and media organisations that investigate AI systems and expose failures regulators do not know about yet. ProPublica\'s investigation into the COMPAS recidivism algorithm changed policy. Reporting on facial recognition errors in policing shifted the debate.',standing:'No formal authority.',power:'medium',powerNote:'Media coverage changes enforcement priorities. Often the only reason regulators find out about a problem.',answers:'Their publications and professional ethics codes'},
+  {id:'csorgs',layer:4,name:'Affected Community Organisations',abbr:'Disability rights, racial justice, migrant rights, digital rights',short:'Represent who the regulation is supposed to protect',what:'Organised groups representing people most at risk from AI harms — disability rights organisations, racial justice groups, migrant rights advocates, digital rights organisations. They submit evidence to regulators, bring complaints, support litigation, and push for stronger rules.',standing:'No formal authority, but recognised standing in many consultation and complaint processes.',power:'medium',powerNote:'Key source of evidence about real-world AI harms. Can trigger regulatory action and shift public debate.',answers:'The communities they represent'},
+  {id:'opensource',layer:4,name:'Open Source Foundations',abbr:'e.g. Linux Foundation (hosts PyTorch)',short:'Advocate against rules that entrench closed-source AI',what:'Organisations supporting open-source AI tools and models. The Linux Foundation, for example, hosts PyTorch — a major AI framework. They advocate against regulatory designs that advantage proprietary closed-source AI over open alternatives.',standing:'No regulatory authority.',power:'medium',powerNote:'Represent a significant alternative to the closed proprietary model stack. Their advocacy shapes how open-source carve-outs in AI regulation are written.',answers:'Their developer and organisational communities'},
+  {id:'notified',layer:4,name:'Notified Bodies & Conformity Assessment',abbr:'e.g. TÜV, SGS — private auditors with quasi-public authority',short:'Private companies that certify high-risk AI for the EU market',what:'Private companies authorised by governments to certify that high-risk AI systems meet legal requirements — the auditors who sign off that a system is compliant before it reaches the EU market. Paid by the companies they assess, which creates a structural tension between independence and revenue.',standing:'Formally designated by national authorities. Their certification decisions have legal significance.',power:'high',powerNote:'Their stamp of approval is the gateway to the EU market for high-risk AI. Enormous power for a private actor.',answers:'The companies that pay them and the national authorities that designate them — a structural tension',flag:'The conformity assessment ecosystem for AI barely exists yet. Very few notified bodies have been formally designated for AI systems. One of the biggest implementation gaps in the AI Act.'},
+  {id:'evalorgs',layer:4,name:'Benchmark & Evaluation Organisations',abbr:'e.g. METR, HELM, EleutherAI',short:'Define what "safe" or "capable" means before regulators do',what:'Research organisations that test and evaluate AI systems for capability, safety, fairness, and robustness. METR, for example, evaluates autonomous AI capabilities for safety. They shape what "safe" or "capable" means before regulators formally define it.',standing:'No formal authority — but increasingly cited by regulators and referenced in standards.',power:'stealth',powerNote:'Define what gets measured, which shapes what gets optimised. Invisible but structurally important.',answers:'Their funders and the research community',flag:'The boundary between independent evaluation and commercial audit-washing is contested and under-regulated.'},
+  {id:'whistleblowers',layer:4,name:'Whistleblowers',abbr:'',short:'Often the only source of information about hidden AI failures',what:'Employees and former employees who disclose AI-related misconduct, safety failures, or deceptive practices. The EU AI Act includes specific whistleblower protections. Often among the most important sources of information about AI failures that would otherwise stay hidden.',standing:'Protected under the AI Act and EU whistleblower directive, though protection varies in practice.',power:'stealth',powerNote:'Trigger real accountability in situations where no other actor has visibility into internal practices.',answers:'Formally: regulators and courts. In practice: their own conscience.'},
+  {id:'insurance',layer:4,name:'Insurance Industry',abbr:'',short:'Quietly enforcing governance through coverage requirements',what:'Insurers pricing and underwriting AI-related risks — product liability, cyber liability, professional indemnity. As AI systems cause real-world harms, a new risk category is developing. Insurers requiring specific controls as a condition of coverage effectively enforce governance norms without any regulatory authority.',standing:'No formal regulatory authority over AI.',power:'stealth',powerNote:'Insurance requirements are quietly becoming a parallel governance mechanism. If you cannot get coverage without an AI audit, the audit happens regardless of what the law says.',answers:'Their shareholders and, through regulation, financial authorities'},
+  {id:'thinktanks',layer:4,name:'AI Safety Think Tanks',abbr:'e.g. GovAI, Centre for AI Safety, Future of Life Institute',short:'Shaped the vocabulary of frontier AI risk in policy',what:'Research organisations focused on long-term AI safety and governance. They produce research, train policymakers, and advocate for specific regulatory approaches. Terms like "catastrophic risk" and "frontier models" in the AI Act trace partly to their influence.',standing:'No formal authority.',power:'medium',powerNote:'Shaped the vocabulary of frontier AI risk. Their framing appears directly in the AI Act\'s provisions on systemic-risk models.',answers:'Their funders — a mix of philanthropic foundations and, in some cases, AI companies'},
+
+  // Layer 5
+  {id:'hyperscalers',layer:5,name:'Cloud Hyperscalers',abbr:'Amazon Web Services, Microsoft Azure, Google Cloud',short:'De-platforming is faster enforcement than any regulator',what:'The dominant cloud computing providers. Almost all significant AI systems run on their infrastructure. Their Terms of Service function as private enforcement — violate them and your system gets de-platformed regardless of what any law says. That is a faster sanction than most regulators can impose.',standing:'No formal regulatory authority.',power:'high',powerNote:'Control the compute and hosting most AI depends on. De-platforming is more immediate than most regulatory action.',answers:'Their shareholders and, partially, antitrust authorities'},
+  {id:'chipmakers',layer:5,name:'Chip Makers & Semiconductor Supply Chain',abbr:'NVIDIA, TSMC, and the export control regime',short:'Chip access is now a tool of geopolitical AI governance',what:'Companies that design and manufacture the specialised processors that train and run AI systems. AI development is constrained by chip availability. Export restrictions on chips are a major geopolitical governance tool — whoever controls chip supply controls who can build frontier AI.',standing:'No formal AI governance role.',power:'high',powerNote:'Chip export restrictions have made semiconductor access a tool of geopolitical AI governance.',answers:'Their shareholders and, for TSMC, partly the Taiwanese government'},
+  {id:'fmproviders',layer:5,name:'Foundation Model Providers',abbr:'OpenAI, Google DeepMind, Anthropic, Meta, Mistral…',short:'Their safety choices propagate through the entire AI ecosystem',what:'Companies developing the large underlying AI models that most other AI products are built on. Under the EU AI Act, they face specific obligations as general-purpose AI (GPAI) model providers, with additional requirements if their models are considered to pose systemic risk.',standing:'Under the EU AI Act, GPAI model providers have formal legal obligations.',power:'high',powerNote:'Their technical and safety choices propagate through the entire AI ecosystem downstream.',answers:'Their investors, boards, and (now) the EU AI Office'},
+  {id:'vc',layer:5,name:'Venture Capital',abbr:'VC',short:'"Move fast" vs "safety first" decided in term sheets, not boardrooms',what:'Investment firms funding early-stage AI companies. Their decisions about what to fund, and what conditions to attach, shape what AI gets built before any regulator sees it. A VC requiring safety processes as a condition of investment creates governance pressure earlier in the development cycle than any law.',standing:'No formal regulatory role.',power:'stealth',powerNote:'Set incentive structures before products exist. The move fast vs safety first choice is often made in a term sheet, not a boardroom.',answers:'Their limited partners — pension funds, endowments, sovereign wealth funds, wealthy individuals'},
+  {id:'swf',layer:5,name:'Sovereign Wealth Funds',abbr:'e.g. Norway\'s Government Pension Fund, Singapore\'s GIC, Abu Dhabi\'s ADIA',short:'State-owned investors increasingly setting AI governance expectations',what:'State-owned investment vehicles. Major investors in AI companies and, increasingly, active on governance expectations. A sovereign wealth fund setting AI ethics requirements for portfolio companies is doing governance at scale, without any regulatory authority.',standing:'No formal AI regulatory role.',power:'medium',powerNote:'Long-term investors with growing interest in AI-related risk. Their governance expectations carry real weight.',answers:'Their governments and citizens'},
+  {id:'appstores',layer:5,name:'App Stores & Distribution Intermediaries',abbr:'Apple App Store, Google Play, enterprise distribution platforms',short:'Control the last mile — can gate AI access by policy',what:'Platforms controlling access to users. Their content policies and technical requirements shape what AI-powered products can reach consumers. Under the EU Digital Markets Act, they also have obligations as "gatekeepers" — a role intersecting with AI governance.',standing:'Some formal obligations under the EU Digital Markets Act.',power:'high',powerNote:'Control the last mile of distribution. Can enforce their own governance rules as a condition of platform access.',answers:'Their shareholders and, increasingly, competition regulators'},
+  {id:'benchproviders',layer:5,name:'Benchmark Providers',abbr:'',short:'What gets measured gets optimised — de facto governance',what:'Organisations creating and running the standardised tests used to measure AI performance. What gets benchmarked shapes what developers optimise for. If a benchmark does not measure safety or fairness, developers may not prioritise those properties. Benchmark design is one of the most consequential governance decisions in AI.',standing:'No formal authority.',power:'stealth',powerNote:'What gets measured gets optimised. Benchmark design is de facto governance without formal standing.',answers:'Their funders and the research community using their benchmarks'},
+
+  // Layer 6
+  {id:'board',layer:6,name:'Board of Directors & Risk Committees',abbr:'',short:'Set risk appetite — AI governance starts here or fails here',what:'The governing body of a company, responsible for oversight of management. Risk committees are increasingly expected to oversee AI-related risk as part of their fiduciary duty. Boards that do not understand AI risk are becoming a liability — regulators and investors are starting to ask questions.',standing:'Legal fiduciary responsibility for the company.',power:'high',powerNote:'Set risk appetite. Approve or block major AI deployments. Sign off on compliance frameworks.',answers:'Shareholders and, in some sectors, regulators'},
+  {id:'csuite',layer:6,name:'C-Suite / Executive Team',abbr:'CEO, CFO, COO, CTO, CRO…',short:'Whether governance is real or symbolic is decided here',what:'The senior leadership of an organisation. They control budgets, priorities, and culture. Whether AI governance is enforced or symbolic depends almost entirely on whether executives treat it as a real priority or a compliance box-tick.',standing:'Formal management authority.',power:'high',powerNote:'Governance lives or dies at executive level. A CEO treating compliance as overhead creates a governance culture to match.',answers:'The board and, indirectly, regulators and the market'},
+  {id:'caio',layer:6,name:'Chief AI Officer',abbr:'CAIO',short:'New role — authority varies widely across organisations',what:'A relatively new executive role responsible for overseeing AI strategy, governance, and risk. Responsibilities vary widely — some CAIOs are technical leaders, others are governance-focused. Not all organisations have one yet. The EU AI Act\'s obligations on AI literacy and documentation make this role increasingly important.',standing:'Formal executive authority, but role definition is still evolving.',power:'medium',powerNote:'Has formal authority but often lacks budget control and cross-functional enforcement power. Effectiveness depends on CEO backing.',answers:'The CEO and board'},
+  {id:'product',layer:6,name:'Product Management',abbr:'',short:'Risk-versus-reward decisions made daily — that is governance',what:'The people who decide what an AI product does, who it serves, and what trade-offs are acceptable. In practice, product managers make risk-versus-reward decisions daily — often without realising these are governance decisions. What gets built, what safety features are included, and when a product ships are all product choices.',standing:'No formal governance authority — but enormous operational authority.',power:'high',powerNote:'The daily governance of AI happens in product decisions. Product managers are de facto governance actors whether they know it or not.',answers:'Business stakeholders, users, and their management chain'},
+  {id:'engineering',layer:6,name:'Engineering & ML Teams',abbr:'Developers, ML researchers, data scientists',short:'Technical decisions here have direct governance implications',what:'The developers, machine learning researchers, and data scientists who build AI systems. They make technical choices — about model architecture, training data, evaluation metrics, deployment — that have direct governance implications. A team building in logging, explainability, and rollback capability is doing governance work.',standing:'No formal governance authority — but significant technical authority.',power:'high',powerNote:'What is technically possible is often decided here before any governance function sees it.',answers:'Product management and engineering leadership'},
+  {id:'dataeng',layer:6,name:'Data Engineers',abbr:'',short:'Govern by selecting what data goes in — often invisible',what:'The people building and maintaining the data pipelines that feed AI systems. They decide what data is clean enough to use, what gets excluded, how data is structured — decisions that directly affect what an AI system learns. Governance by data selection, often invisible to everyone else.',standing:'No formal governance authority.',power:'stealth',powerNote:'Govern through what they include and exclude from training data. Their choices propagate into model behaviour.',answers:'Data leadership and engineering management'},
+  {id:'legal',layer:6,name:'Legal & Compliance',abbr:'',short:'Translate regulation into internal controls — often overruled',what:'The lawyers, compliance officers, and regulatory affairs teams ensuring the organisation meets its legal obligations. Under the EU AI Act, compliance teams need to understand a complex new framework and translate it into internal controls, contracts, and documentation requirements.',standing:'Formal internal authority over compliance decisions.',power:'medium',powerNote:'Can block deployments and require documentation. Often in tension with speed-focused product and engineering teams.',answers:'General counsel, C-suite, and external regulators'},
+  {id:'dpo',layer:6,name:'Data Protection Officer',abbr:'DPO',short:'Legally required in many EU organisations — formally independent',what:'A legally required role in many EU organisations under the GDPR (General Data Protection Regulation). Responsible for advising on data protection obligations and acting as contact point for the data protection authority. Because AI and personal data overlap constantly, the DPO is often the internal person most engaged with AI governance.',standing:'Formal legal role under GDPR. Must be independent and cannot be penalised for performing duties.',power:'medium',powerNote:'Can escalate to the supervisory authority. Formal independence is unusual for an internal role.',answers:'Management internally, but must be able to act independently. Also accountable to the data protection authority.'},
+  {id:'intaudit',layer:6,name:'Internal Audit',abbr:'',short:'Tests whether governance controls actually work',what:'The independent function within an organisation that tests whether controls actually work — as opposed to just existing on paper. Increasingly being asked to audit AI systems for compliance, bias, and risk. Often brought in too late to change fundamental decisions, but able to identify what needs fixing.',standing:'Formal internal authority to assess controls and report to the board.',power:'medium',powerNote:'The only internal function specifically designed to check whether governance is real or just symbolic.',answers:'The audit committee of the board'},
+  {id:'procurement',layer:6,name:'Procurement & Vendor Management',abbr:'',short:'Governance happens at the point of purchase',what:'The teams that buy AI-powered tools and services from external vendors. Under the EU AI Act, buying an AI system makes you a deployer with your own legal obligations. Procurement teams building governance requirements into contracts — audit rights, documentation, liability — are doing governance at the point of purchase.',standing:'No formal regulatory authority. Controls supplier relationships.',power:'high',powerNote:'Shadow AI — employees using unsanctioned tools — often becomes visible first when someone tries to expense a subscription.',answers:'Finance, legal, and business leadership'},
+  {id:'hr',layer:6,name:'HR & People Analytics',abbr:'',short:'Controls AI use on workers — a high-risk AI Act category',what:'Human resources teams and the AI-powered tools they use for hiring, performance management, and workforce planning. Also responsible for workers as subjects of AI — employees monitored, evaluated, or managed by algorithmic systems. Sits at the intersection of labour law, data protection, and AI governance.',standing:'No formal AI governance authority. Manages employment relationships.',power:'medium',powerNote:'Controls how AI is used on workers — one of the most sensitive applications in the AI Act\'s high-risk categories.',answers:'C-suite and, through employment law, labour regulators'},
+  {id:'salesmarketing',layer:6,name:'Sales & Marketing',abbr:'',short:'Overclaiming AI creates deception liability',what:'The teams communicating what an AI system does to customers. False or misleading claims about AI capabilities create legal liability. Marketing teams are governance actors because overpromising creates harm, and because transparency obligations require accurate descriptions of what a system actually does.',standing:'No formal governance role, but creates external representations the organisation is held to.',power:'stealth',powerNote:'Create the gap between what AI actually does and what customers think it does. That gap is where deception liability lives.',answers:'Commercial leadership and, through consumer law, regulators'},
+  {id:'frontline',layer:6,name:'Frontline Staff & Operators',abbr:'',short:'The last human in the loop — override culture matters',what:'The employees who actually use AI systems daily — customer service agents, HR coordinators, medical staff, loan officers. They often see AI failures first. The EU AI Act specifically requires that operators of high-risk AI systems can override automated outputs. Whether override actually happens depends on frontline culture.',standing:'Under the AI Act, human oversight obligations apply at this level for high-risk systems.',power:'stealth',powerNote:'The last human in the loop before an AI decision affects someone. Override culture determines whether human oversight is real.',answers:'Their line managers and, through the AI Act, regulators'},
+
+  // Layer 7
+  {id:'users',layer:7,name:'Users & Consumers',abbr:'',short:'Have transparency rights — and complaint mechanisms',what:'People who interact with AI systems as end users. Under the AI Act, they have transparency rights: the right to know when they are interacting with an AI system. They can also complain to consumer protection bodies and data protection authorities.',standing:'Rights-holders under the AI Act, GDPR, and consumer protection law.',power:'low',powerNote:'Individually limited power. Collectively — through complaints, reviews, churn, and media attention — can shift corporate and regulatory behaviour.',answers:'Nobody directly — they are the people the whole system is supposed to answer to'},
+  {id:'workers',layer:7,name:'Workers as Subjects of AI',abbr:'',short:'Monitored and managed by AI — limited visibility into it',what:'Employees who are monitored, evaluated, hired, or managed by AI systems. Distinct from workers who use AI as a tool. The AI Act lists employment-related AI among high-risk systems. These workers often have limited visibility into how AI affects their conditions.',standing:'Protected by employment law, data protection law, and for high-risk AI, the AI Act.',power:'low',powerNote:'Limited individual power. The strongest leverage is collective — through unions.',answers:'Their employers and, through law, regulators'},
+  {id:'unions',layer:7,name:'Unions & Worker Organisations',abbr:'',short:'Bargaining for AI rights in collective agreements',what:'Trade unions and worker organisations collectively representing employee interests. Increasingly bargaining for rights around AI — algorithmic management, surveillance, automated hiring decisions. Some unions have successfully negotiated AI-specific provisions into collective agreements.',standing:'Recognised bargaining partners under labour law. No AI-specific formal standing yet in most jurisdictions.',power:'medium',powerNote:'Collective bargaining gives leverage that individual workers lack. AI governance is increasingly on the bargaining table.',answers:'Their members'},
+  {id:'patients',layer:7,name:'Patients & Patient Advocacy Groups',abbr:'',short:'Pushing back on AI-driven healthcare decisions',what:'People receiving healthcare where AI is used in diagnosis, treatment recommendations, or administrative decisions. Patient advocacy organisations are engaging with AI governance — pushing back on AI-driven insurance denials and advocating for explainability in clinical AI.',standing:'Rights-holders under health law, data protection law, and the AI Act\'s high-risk provisions.',power:'low',powerNote:'Growing through advocacy and litigation. AI-driven healthcare decisions are becoming a litigation frontier.',answers:'Nobody directly — they are the people high-risk healthcare AI most directly affects'},
+  {id:'voters',layer:7,name:'Voters',abbr:'',short:'Political will to regulate AI starts here',what:'Citizens who elect the legislators who write AI law and the governments that fund regulators. AI governance ultimately depends on democratic legitimacy. Electoral outcomes shape which AI policies get prioritised.',standing:'Democratic authority through elections.',power:'medium',powerNote:'Indirect but foundational. The political will to regulate AI — or not — comes from here.',answers:'Nobody — in democratic systems, voters are the source of political authority'},
+  {id:'litigants',layer:7,name:'Litigants & Complainants',abbr:'',short:'One good case can set sector-wide precedent',what:'Individuals and organisations bringing formal complaints to regulators or taking AI-related cases to court. A single well-chosen case can establish precedent that changes how AI is used across an entire sector.',standing:'Right to complain to regulators and to bring cases to court.',power:'medium',powerNote:'Individual cases can set precedent with sector-wide effect.',answers:'Courts and regulators'},
+  {id:'affectedpeople',layer:7,name:'Affected Communities',abbr:'',short:'Ground truth of AI governance — lowest formal power',what:'Groups experiencing the effects of AI systems — often without knowing about the AI\'s involvement. This includes communities over-policed by predictive systems, people denied housing or credit by algorithmic scoring, and groups whose data was used without consent.',standing:'Rights-holders under fundamental rights law, data protection law, and the AI Act.',power:'low',powerNote:'Low formal power but the ground truth of AI governance. When the system works, their interests are what it protects.',answers:'Nobody directly — which is the governance failure the AI Act is meant to address'},
+];
+
+// Power badge
+function powerBadge(power) {
+  const map = {
+    high:    ['pb-high',    'High power'],
+    medium:  ['pb-medium',  'Medium power'],
+    low:     ['pb-low',     'Low power'],
+    stealth: ['pb-stealth', 'Stealth power'],
+    emerging:['pb-emerging','Emerging'],
+  };
+  const [cls, label] = map[power] || ['pb-low','?'];
+  return `<span class="power-badge ${cls}">${label}</span>`;
+}
+
+function powerNote(power, note) {
+  return `<div class="power-inline">${powerBadge(power)}<span class="power-note">${note}</span></div>`;
+}
+
+// Build DOM
+const main = document.getElementById('main');
+
+LAYERS.forEach(layer => {
+  const layerNodes = NODES.filter(n => n.layer === layer.id);
+
+  const section = document.createElement('div');
+  section.className = 'layer-section';
+  section.dataset.layer = layer.id;
+
+  section.innerHTML = `
+    <div class="layer-header">
+      <div class="layer-stripe" style="background:${layer.color}"></div>
+      <div class="layer-header-text">
+        <div class="layer-number" style="color:${layer.color}">Layer ${layer.id}</div>
+        <div class="layer-title">${layer.title}</div>
+        <div class="layer-subtitle">${layer.subtitle}</div>
+      </div>
+      <div class="layer-meta">
+        <span class="actor-count">${layerNodes.length} actors</span>
+        <span class="chevron">▾</span>
+      </div>
+    </div>
+    <div class="layer-body">
+      <div style="padding:14px 18px 10px;font-size:12px;line-height:1.65;color:#5a5650;border-bottom:1px solid rgba(26,24,20,0.06)">${layer.desc}</div>
+      <div class="actor-list">
+        ${layerNodes.map(node => `
+          <div class="actor-item" data-id="${node.id}">
+            <div class="actor-header">
+              <div class="actor-dot" style="background:${layer.color}"></div>
+              <div class="actor-main">
+                <div class="actor-name">${node.name}</div>
+                <div class="actor-short">${node.short}</div>
+              </div>
+              <div class="actor-right">
+                ${powerBadge(node.power)}
+                ${node.flag ? '<div class="flag-dot" title="Contested / still evolving"></div>' : ''}
+              </div>
+              <span class="actor-chevron">▾</span>
+            </div>
+            <div class="actor-panel">
+              ${node.abbr ? `<div class="actor-panel-abbr">${node.abbr}</div>` : ''}
+              <p class="actor-panel-what">${node.what}</p>
+              <div class="panel-meta-grid">
+                <div>
+                  <div class="pmeta-label">Formal standing</div>
+                  <div class="pmeta-val">${node.standing}</div>
+                </div>
+                <div>
+                  <div class="pmeta-label">Real power</div>
+                  <div class="pmeta-val">${powerNote(node.power, node.powerNote)}</div>
+                </div>
+                <div>
+                  <div class="pmeta-label">Answers to</div>
+                  <div class="pmeta-val">${node.answers}</div>
+                </div>
+              </div>
+              ${node.flag ? `<div class="flag-box">⚠ ${node.flag}</div>` : ''}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  // Layer toggle
+  section.querySelector('.layer-header').addEventListener('click', () => {
+    const isOpen = section.classList.contains('open');
+    section.classList.toggle('open', !isOpen);
+  });
+
+  // Actor toggle
+  section.querySelectorAll('.actor-item').forEach(item => {
+    item.querySelector('.actor-header').addEventListener('click', e => {
+      e.stopPropagation();
+      item.classList.toggle('open');
+    });
+  });
+
+  main.appendChild(section);
+});
+</script>
+</body>
+</html>
